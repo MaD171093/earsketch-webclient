@@ -41,6 +41,7 @@ import * as userNotification from "../user/notification"
 import * as user from "../user/userState"
 import type { DAWData } from "common"
 import classNames from "classnames"
+import { ModalBody, ModalFooter, ModalHeader } from "../Utils"
 
 const STATUS_SUCCESSFUL = 1
 const STATUS_UNSUCCESSFUL = 2
@@ -484,10 +485,115 @@ export const IDE = ({ closeAllTabs, importScript, shareScript, downloadScript }:
                                 : <CAI />)}
                         </div>)}
                     <div className={showCai ? "h-full hidden" : "h-full"}>
-                        <Curriculum />
+                        <ExtensionContainer />
                     </div>
                 </div>
             </Split>
         </div>
     </main>
+}
+
+function ExtensionContainer() {
+    const ext: string = "GEN_AI"
+    switch (ext) {
+        case "CURRICULUM": return <Curriculum />
+        case "YVIP": return <YVIPCurriculum />
+        case "CAI": return <CAI />
+        case "GEN_AI": return <GenAI />
+        case "BYTEBEAT_COMPOSER": return <BytebeatComposer />
+        default: return <Curriculum />
+    }
+}
+
+function YVIPCurriculum() {
+    return (<>
+        <ExtTitleBar title="YVIP" />
+        <ModalBody><h1>YVIP extension</h1></ModalBody>
+    </>)
+}
+
+function GenAI() {
+    return (<>
+        <ExtTitleBar title="AI" />
+        <ModalBody>
+            <h1>Generative AI extension</h1>
+            <img src="https://upload.wikimedia.org/wikipedia/en/0/0c/The_Genie_Aladdin.png" alt="Genie" />
+        </ModalBody>
+    </>)
+}
+
+function BytebeatComposer() {
+    return (<>
+        <ExtTitleBar title="Bytebeats" />
+        <ModalBody><h1>Bytebeat Composer extension</h1></ModalBody>
+    </>)
+}
+
+const ExtTitleBar = ({ title }: { title: string }) => {
+    const dispatch = useDispatch()
+    const language = useSelector(appState.selectScriptLanguage)
+    const currentLocale = useSelector(appState.selectLocale)
+    const { t } = useTranslation()
+
+    return (
+        <div className="flex items-center p-2">
+            <div className="ltr:pl-2 ltr:pr-4 rtl:pl-4 rtl:pr-3 font-semibold truncate">
+                <h2>{t(title).toLocaleUpperCase()}</h2>
+            </div>
+            <div>
+                <button
+                    className="flex justify-end w-7 h-4 p-0.5 rounded-full cursor-pointer bg-black dark:bg-gray-700"
+                    // onClick={() => dispatch(layout.setEast({ open: false }))}
+                    onClick={() => {}}
+                    title={t("curriculum.close")}
+                    aria-label={t("curriculum.close")}
+                >
+                    <div className="w-3 h-3 bg-white rounded-full">&nbsp;</div>
+                </button>
+            </div>
+            {/* TODO: upgrade to tailwind 3 for rtl modifiers to remove ternary operator */}
+            <div className={currentLocale.direction === "rtl" ? "mr-auto" : "ml-auto"}>
+                <button className="px-2 -my-1 align-middle text-lg" onClick={() => {}} title="Copy URL">
+                    <i className="icon icon-link" />
+                </button>
+                <button className="border-2 -my-1 border-black dark:border-white text-sm px-2.5 rounded-lg font-bold mx-1.5 align-text-bottom"
+                    title={t("ariaDescriptors:curriculum.switchScriptLanguage", { language: language === "python" ? "javascript" : "python" })}
+                    onClick={() => {
+                        const newLanguage = (language === "python" ? "javascript" : "python")
+                        dispatch(appState.setScriptLanguage(newLanguage))
+                    }}>
+                    {language === "python" ? "PY" : "JS"}
+                </button>
+                <button className="border-2 -my-1 border-black dark:border-white bg-green-400 text-sm px-2.5 rounded-lg font-bold mx-1.5 align-text-bottom"
+                    title={t("ariaDescriptors:curriculum.switchScriptLanguage", { language: language === "python" ? "javascript" : "python" })}
+                    onClick={() => {
+                        openModal(ExtensionModal)
+                    }}>
+                    OPEN EXTENSION
+                </button>
+            </div>
+        </div>
+    )
+}
+
+export const ExtensionModal = ({ close }: { close: () => void }) => {
+    return <>
+        <ModalHeader>Extensions</ModalHeader>
+        <ModalBody>
+            <div className="text-xl text-amber">Open Built-in extension</div>
+            <table>
+                <tr><td style={{ width: "280px" }}>Extension</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
+                <tr><td>Curriculum</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
+                <tr><td>YVIP Competition</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
+                <tr><td>CAI</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
+                <tr><td>Generative AI</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
+                <tr><td>VSCode Integration</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
+            </table>
+            <div className="text-xl text-amber">Load from GitHub URL</div>
+            <table>
+                <tr><td style={{ width: "280px" }}><input type="text" placeholder="Enter GitHub URL" /></td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
+            </table>
+        </ModalBody>
+        <ModalFooter close={close} />
+    </>
 }

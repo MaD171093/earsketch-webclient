@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next"
 import * as cai from "../cai/caiState"
 import * as caiThunks from "../cai/caiThunks"
 import { Language } from "common"
+import { openModal } from "../app/modal"
+import { ExtensionModal } from "../ide/IDE"
 
 const SECTION_URL_CHARACTER = ":"
 
@@ -236,6 +238,13 @@ export const TitleBar = () => {
                         dispatch(appState.setScriptLanguage(newLanguage))
                     }}>
                     {language === "python" ? "PY" : "JS"}
+                </button>
+                <button className="border-2 -my-1 border-black dark:border-white bg-green-400 text-sm px-2.5 rounded-lg font-bold mx-1.5 align-text-bottom"
+                    title={t("ariaDescriptors:curriculum.switchScriptLanguage", { language: language === "python" ? "javascript" : "python" })}
+                    onClick={() => {
+                        openModal(ExtensionModal)
+                    }}>
+                    OPEN EXTENSION
                 </button>
             </div>
         </div>
