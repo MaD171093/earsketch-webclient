@@ -1,47 +1,47 @@
-import i18n from "i18next"
 import parse from "html-react-parser"
+import i18n from "i18next"
 import React, { useEffect, useRef, useState } from "react"
-import { useAppDispatch as useDispatch, useAppSelector as useSelector } from "../hooks"
 import { useTranslation } from "react-i18next"
 import Split from "react-split"
+import { useAppDispatch as useDispatch, useAppSelector as useSelector } from "../hooks"
 
-import * as appState from "../app/appState"
-import { Browser } from "../browser/Browser"
-import * as bubble from "../bubble/bubbleState"
-import { CAI } from "../cai/CAI"
-import * as caiThunks from "../cai/caiThunks"
-import { Chat } from "../cai/Chat"
-import * as collaboration from "../app/collaboration"
+import classNames from "classnames"
+import type { DAWData } from "common"
 import { Script } from "common"
-import { Curriculum } from "../browser/Curriculum"
-import * as curriculum from "../browser/curriculumState"
-import { callbacks as dawCallbacks, DAW, setDAWData } from "../daw/DAW"
-import * as editor from "./Editor"
-import { EditorHeader } from "./EditorHeader"
-import esconsole from "../esconsole"
-import * as ESUtils from "../esutils"
-import { setReady } from "../bubble/bubbleState"
-import { dismiss } from "../bubble/bubbleThunks"
-import * as ide from "./ideState"
-import * as layout from "./layoutState"
+import * as appState from "../app/appState"
+import * as collaboration from "../app/collaboration"
 import { openModal } from "../app/modal"
 import { reloadRecommendations } from "../app/reloadRecommender"
 import reporter from "../app/reporter"
 import * as runner from "../app/runner"
 import { ScriptCreator } from "../app/ScriptCreator"
-import store from "../reducers"
+import { Browser } from "../browser/Browser"
+import { Curriculum } from "../browser/Curriculum"
+import * as curriculum from "../browser/curriculumState"
 import * as scripts from "../browser/Scripts"
 import * as scriptsState from "../browser/scriptsState"
 import * as scriptsThunks from "../browser/scriptsThunks"
+import * as bubble from "../bubble/bubbleState"
+import { setReady } from "../bubble/bubbleState"
+import { dismiss } from "../bubble/bubbleThunks"
+import { CAI } from "../cai/CAI"
+import * as caiThunks from "../cai/caiThunks"
+import { Chat } from "../cai/Chat"
+import { DAW, callbacks as dawCallbacks, setDAWData } from "../daw/DAW"
+import esconsole from "../esconsole"
+import * as ESUtils from "../esutils"
+import store from "../reducers"
+import * as userNotification from "../user/notification"
+import * as user from "../user/userState"
+import { ModalBody, ModalFooter, ModalHeader } from "../Utils"
+import * as ideConsole from "./console"
+import * as editor from "./Editor"
+import { EditorHeader } from "./EditorHeader"
+import * as ide from "./ideState"
+import * as layout from "./layoutState"
 import { Tabs } from "./Tabs"
 import * as tabs from "./tabState"
 import { saveScriptIfModified, setActiveTabAndEditor } from "./tabThunks"
-import * as ideConsole from "./console"
-import * as userNotification from "../user/notification"
-import * as user from "../user/userState"
-import type { DAWData } from "common"
-import classNames from "classnames"
-import { ModalBody, ModalFooter, ModalHeader } from "../Utils"
 
 const STATUS_SUCCESSFUL = 1
 const STATUS_UNSUCCESSFUL = 2
@@ -355,6 +355,8 @@ export const IDE = ({ closeAllTabs, importScript, shareScript, downloadScript }:
     const bubbleActive = useSelector(bubble.selectActive)
     const bubblePage = useSelector(bubble.selectCurrentPage)
 
+    const activeExtension = useSelector(appState.selectActiveExtension)
+
     const showCai = useSelector(layout.selectEastKind) === "CAI" && (FLAGS.SHOW_CAI || FLAGS.SHOW_CHAT)
 
     const logs = useSelector(ide.selectLogs)
@@ -485,7 +487,7 @@ export const IDE = ({ closeAllTabs, importScript, shareScript, downloadScript }:
                                 : <CAI />)}
                         </div>)}
                     <div className={showCai ? "h-full hidden" : "h-full"}>
-                        <ExtensionContainer />
+                        <ExtensionContainer activeExtension={activeExtension} />
                     </div>
                 </div>
             </Split>
@@ -493,28 +495,72 @@ export const IDE = ({ closeAllTabs, importScript, shareScript, downloadScript }:
     </main>
 }
 
-function ExtensionContainer() {
-    const ext: string = "GEN_AI"
-    switch (ext) {
+function ExtensionContainer({ activeExtension }: { activeExtension: string }) {
+    switch (activeExtension) {
         case "CURRICULUM": return <Curriculum />
+        case "BACK_TO_SCHOOL": return <BackToSchoolBeatsCurriculum />
         case "YVIP": return <YVIPCurriculum />
         case "CAI": return <CAI />
         case "GEN_AI": return <GenAI />
         case "BYTEBEAT_COMPOSER": return <BytebeatComposer />
+        case "TTS": return <TextToSinging />
         default: return <Curriculum />
     }
 }
 
+export const ExtensionModal = ({ close }: { close: () => void }) => {
+    const dispatch = useDispatch()
+
+    const builtinExtensions = [
+        { name: "Curriculum", key: "CURRICULUM" },
+        { name: "Back-to-School Beats", key: "BACK_TO_SCHOOL" },
+        // { name: "YVIP Competition", key: "YVIP" },
+        // { name: "CAI", key: "CAI" },
+        // { name: "Generative AI", key: "GEN_AI" },
+        // { name: "VSCode Integration", key: "VSCODE" },
+    ]
+
+    return <>
+        <ModalHeader>Extensions</ModalHeader>
+        <ModalBody>
+            <div className="text-xl text-amber">Open Built-in extension</div>
+            <table>
+                {builtinExtensions.map(ext => (
+                    <tr key={ext.key}>
+                        <td style={{ width: "280px" }}>{ext.name}</td>
+                        <td><button onClick={() => { dispatch(appState.setActiveExtension(ext.key)) }} style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td>
+                    </tr>
+                ))}
+            </table>
+            <div className="text-xl text-amber">Load from GitHub URL</div>
+            <table>
+                <tr>
+                    <td style={{ width: "280px" }}><input type="text" placeholder="Enter GitHub URL" /></td>
+                    <td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td>
+                </tr>
+            </table>
+        </ModalBody>
+        <ModalFooter close={close} />
+    </>
+}
+
+function BackToSchoolBeatsCurriculum() {
+    return (<>
+        <TitleBar title="Back to School Beats" />
+        <ModalBody><h1>Back to School Beats curriculum extension</h1></ModalBody>
+    </>)
+}
+
 function YVIPCurriculum() {
     return (<>
-        <ExtTitleBar title="YVIP" />
-        <ModalBody><h1>YVIP extension</h1></ModalBody>
+        <TitleBar title="YVIP" />
+        <ModalBody><h1>YVIP curriculum extension</h1></ModalBody>
     </>)
 }
 
 function GenAI() {
     return (<>
-        <ExtTitleBar title="AI" />
+        <TitleBar title="AI" />
         <ModalBody>
             <h1>Generative AI extension</h1>
             <img src="https://upload.wikimedia.org/wikipedia/en/0/0c/The_Genie_Aladdin.png" alt="Genie" />
@@ -524,12 +570,19 @@ function GenAI() {
 
 function BytebeatComposer() {
     return (<>
-        <ExtTitleBar title="Bytebeats" />
+        <TitleBar title="Bytebeats" />
         <ModalBody><h1>Bytebeat Composer extension</h1></ModalBody>
     </>)
 }
 
-const ExtTitleBar = ({ title }: { title: string }) => {
+function TextToSinging() {
+    return (<>
+        <TitleBar title="Text-to-Singing" />
+        <ModalBody><h1>Upload spoken word</h1></ModalBody>
+    </>)
+}
+
+export const TitleBar = ({ title }: { title: string }) => {
     const dispatch = useDispatch()
     const language = useSelector(appState.selectScriptLanguage)
     const currentLocale = useSelector(appState.selectLocale)
@@ -574,26 +627,4 @@ const ExtTitleBar = ({ title }: { title: string }) => {
             </div>
         </div>
     )
-}
-
-export const ExtensionModal = ({ close }: { close: () => void }) => {
-    return <>
-        <ModalHeader>Extensions</ModalHeader>
-        <ModalBody>
-            <div className="text-xl text-amber">Open Built-in extension</div>
-            <table>
-                <tr><td style={{ width: "280px" }}>Extension</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
-                <tr><td>Curriculum</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
-                <tr><td>YVIP Competition</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
-                <tr><td>CAI</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
-                <tr><td>Generative AI</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
-                <tr><td>VSCode Integration</td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
-            </table>
-            <div className="text-xl text-amber">Load from GitHub URL</div>
-            <table>
-                <tr><td style={{ width: "280px" }}><input type="text" placeholder="Enter GitHub URL" /></td><td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td></tr>
-            </table>
-        </ModalBody>
-        <ModalFooter close={close} />
-    </>
 }

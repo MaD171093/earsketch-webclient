@@ -21,6 +21,7 @@ const appSlice = createSlice({
         colorTheme: "light" as "light" | "dark",
         fontSize: 14,
         embedMode,
+        activeExtension: "CURRICULUM",
         hideDAW,
         hideEditor,
         embeddedScriptName: null,
@@ -44,6 +45,9 @@ const appSlice = createSlice({
         // Perhaps these should go in another slice?
         setEmbedMode(state, { payload }) {
             state.embedMode = payload
+        },
+        setActiveExtension(state, { payload }) {
+            state.activeExtension = payload
         },
         setHideDAW(state, { payload }) {
             state.hideDAW = payload
@@ -74,7 +78,7 @@ const appSlice = createSlice({
 
 const persistConfig = {
     key: "app",
-    blacklist: ["embedMode", "hideDAW", "hideEditor", "embeddedScriptUsername", "embeddedScriptName", "embeddedShareID", "modal", "confetti"],
+    blacklist: ["embedMode", "activeExtension", "hideDAW", "hideEditor", "embeddedScriptUsername", "embeddedScriptName", "embeddedShareID", "modal", "confetti"],
     storage,
 }
 
@@ -84,6 +88,7 @@ export const {
     setColorTheme,
     setFontSize,
     setEmbedMode,
+    setActiveExtension,
     setHideDAW,
     setHideEditor,
     setEmbeddedScriptUsername,
@@ -99,6 +104,7 @@ export const selectColorTheme = (state: RootState) => state.app.colorTheme
 // TODO: Figure out the right way to do this with redux-persist.
 export const selectFontSize = (state: RootState) => state.app.fontSize || 14
 export const selectEmbedMode = (state: RootState) => state.app.embedMode
+export const selectActiveExtension = (state: RootState) => state.app.activeExtension
 export const selectHideDAW = (state: RootState) => state.app.hideDAW
 export const selectHideEditor = (state: RootState) => state.app.hideEditor
 export const selectEmbeddedScriptUsername = (state: RootState) => state.app.embeddedScriptUsername

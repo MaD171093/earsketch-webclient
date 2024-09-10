@@ -16,7 +16,7 @@ import * as cai from "../cai/caiState"
 import * as caiThunks from "../cai/caiThunks"
 import { Language } from "common"
 import { openModal } from "../app/modal"
-import { ExtensionModal } from "../ide/IDE"
+import { ExtensionModal, TitleBar } from "../ide/IDE"
 
 const SECTION_URL_CHARACTER = ":"
 
@@ -156,7 +156,7 @@ const CurriculumHeader = () => {
 
     return (
         <div id="curriculum-header" style={{ position: "relative" }}>
-            <TitleBar />
+            <TitleBar title="curriculum.title" />
             <NavigationBar />
 
             <div onFocus={() => dispatch(curriculum.showResults(true))}
@@ -195,7 +195,7 @@ const CurriculumSearchResults = () => {
         : null
 }
 
-export const TitleBar = () => {
+export const CurriculumTitleBar = () => {
     const dispatch = useDispatch()
     const language = useSelector(appState.selectScriptLanguage)
     const currentLocale = useSelector(appState.selectLocale)
