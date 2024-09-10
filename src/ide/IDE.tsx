@@ -502,6 +502,7 @@ function ExtensionContainer({ activeExtension }: { activeExtension: string }) {
         case "YVIP": return <YVIPCurriculum />
         case "CAI": return <CAI />
         case "GEN_AI": return <GenAI />
+        case "VSCODE": return <VsCodeIntegration />
         case "BYTEBEAT_COMPOSER": return <BytebeatComposer />
         case "TTS": return <TextToSinging />
         default: return <Curriculum />
@@ -509,6 +510,7 @@ function ExtensionContainer({ activeExtension }: { activeExtension: string }) {
 }
 
 export const ExtensionModal = ({ close }: { close: () => void }) => {
+    const inputRef = useRef<HTMLInputElement>(null)
     const dispatch = useDispatch()
 
     const builtinExtensions = [
@@ -528,15 +530,24 @@ export const ExtensionModal = ({ close }: { close: () => void }) => {
                 {builtinExtensions.map(ext => (
                     <tr key={ext.key}>
                         <td style={{ width: "280px" }}>{ext.name}</td>
-                        <td><button onClick={() => { dispatch(appState.setActiveExtension(ext.key)) }} style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td>
+                        <td><button onClick={() => { dispatch(appState.setActiveExtension(ext.key)); close() }} style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td>
                     </tr>
                 ))}
             </table>
             <div className="text-xl text-amber">Load from GitHub URL</div>
             <table>
                 <tr>
-                    <td style={{ width: "280px" }}><input type="text" placeholder="Enter GitHub URL" /></td>
-                    <td><button style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td>
+                    <td style={{ width: "280px" }}><input type="text" className="border-2" placeholder="Enter GitHub URL" ref={inputRef} /></td>
+                    <td><button
+                        onClick={() => {
+                            if (inputRef.current && inputRef.current.value === "https://github.com/earsketch/l33t-ext/vscode-integration") {
+                                dispatch(appState.setActiveExtension("VSCODE"))
+                            } else if (inputRef.current && inputRef.current.value === "https://github.com/earsketch/l33t-ext/text-to-singing") {
+                                dispatch(appState.setActiveExtension("TTS"))
+                            }
+                            close()
+                        }}
+                        style={{ marginLeft: "20px" }} className="text-blue-500">Load</button></td>
                 </tr>
             </table>
         </ModalBody>
@@ -547,7 +558,9 @@ export const ExtensionModal = ({ close }: { close: () => void }) => {
 function BackToSchoolBeatsCurriculum() {
     return (<>
         <TitleBar title="Back to School Beats" />
-        <ModalBody><h1>Back to School Beats curriculum</h1></ModalBody>
+        <ModalBody>
+            <iframe src="https://www.teachers.earsketch.org/compete" style={{ height: "900px", width: "700px" }} />
+        </ModalBody>
     </>)
 }
 
@@ -572,6 +585,32 @@ function GenAI() {
     </>)
 }
 
+function VsCodeIntegration() {
+    return (
+        <>
+            <TitleBar title="VSCode Integration" />
+            <ModalBody>
+                <div
+                    className="bg-yellow-300 rounded-lg p-4 text-gray-800 mb-4"
+                    style={{ borderRadius: "12px" }}
+                >
+                    Your active script will be monitored and kept in sync with VS Code.
+                </div>
+                <div className="text-base text-gray-600">
+                    This integration allows seamless sync between your development environment and
+                    the VS Code editor, providing a smoother workflow for coding and testing.
+                </div>
+                <div style={{ marginTop: "20px" }}>
+                    <img src="https://reliancedatacorp.com/wp-content/uploads/2017/08/data-flow.jpg" />
+                </div>
+                <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+                    <button className="bg-green-500 text-white rounded-lg p-2" >Activate</button>
+                </div>
+            </ModalBody>
+        </>
+    )
+}
+
 function BytebeatComposer() {
     return (<>
         <TitleBar title="Bytebeats" />
@@ -580,10 +619,77 @@ function BytebeatComposer() {
 }
 
 function TextToSinging() {
-    return (<>
-        <TitleBar title="Text-to-Singing" />
-        <ModalBody><h1>Upload spoken word</h1></ModalBody>
-    </>)
+    return (
+        <>
+            <TitleBar title="Text-to-Singing" />
+            <ModalBody>
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                    <img style={{ height: "200px" }} src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Places_of_articulation.svg/800px-Places_of_articulation.svg.png" />
+                </div>
+
+                {/* Input Text */}
+                <div className="mb-4">
+                    <label className="block text-gray-700">Enter Text:</label>
+                    <textarea
+                        className="w-full border-2 rounded-lg p-2"
+                        rows={4}
+                        placeholder="Type or paste your text here..."
+                    />
+                </div>
+
+                {/* Voice Type */}
+                <div className="mb-4">
+                    <label className="block text-gray-700">Voice Type:</label>
+                    <select className="border-2 rounded-lg p-2 w-full">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                {/* Speed */}
+                <div className="mb-4">
+                    <label className="block text-gray-700">Speed:</label>
+                    <input
+                        type="range"
+                        className="w-full"
+                        min="0.5"
+                        max="2"
+                        step="0.1"
+                        defaultValue="1"
+                    />
+                </div>
+
+                {/* Pitch */}
+                <div className="mb-4">
+                    <label className="block text-gray-700">Pitch:</label>
+                    <input
+                        type="range"
+                        className="w-full"
+                        min="-12"
+                        max="12"
+                        step="1"
+                        defaultValue="0"
+                    />
+                </div>
+
+                {/* Language */}
+                <div className="mb-4">
+                    <label className="block text-gray-700">Language:</label>
+                    <select className="border-2 rounded-lg p-2 w-full">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                    </select>
+                </div>
+
+                {/* Generate Button */}
+                <button className="bg-blue-500 text-white p-2 rounded-lg w-full">
+                    Generate Audio
+                </button>
+            </ModalBody>
+        </>
+    )
 }
 
 export const TitleBar = ({ title }: { title: string }) => {
