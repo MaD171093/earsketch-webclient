@@ -514,9 +514,9 @@ export const ExtensionModal = ({ close }: { close: () => void }) => {
     const builtinExtensions = [
         { name: "Curriculum", key: "CURRICULUM" },
         { name: "Back-to-School Beats", key: "BACK_TO_SCHOOL" },
+        { name: "Generative AI", key: "GEN_AI" },
         // { name: "YVIP Competition", key: "YVIP" },
         // { name: "CAI", key: "CAI" },
-        // { name: "Generative AI", key: "GEN_AI" },
         // { name: "VSCode Integration", key: "VSCODE" },
     ]
 
@@ -547,23 +547,27 @@ export const ExtensionModal = ({ close }: { close: () => void }) => {
 function BackToSchoolBeatsCurriculum() {
     return (<>
         <TitleBar title="Back to School Beats" />
-        <ModalBody><h1>Back to School Beats curriculum extension</h1></ModalBody>
+        <ModalBody><h1>Back to School Beats curriculum</h1></ModalBody>
     </>)
 }
 
 function YVIPCurriculum() {
     return (<>
         <TitleBar title="YVIP" />
-        <ModalBody><h1>YVIP curriculum extension</h1></ModalBody>
+        <ModalBody><h1>YVIP curriculum</h1></ModalBody>
     </>)
 }
 
 function GenAI() {
     return (<>
-        <TitleBar title="AI" />
+        <TitleBar title="Generative AI" />
         <ModalBody>
-            <h1>Generative AI extension</h1>
-            <img src="https://upload.wikimedia.org/wikipedia/en/0/0c/The_Genie_Aladdin.png" alt="Genie" />
+            <div className="text-lg">You ain&apos;t never had a friend like me!</div>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <FloatingImage imageUrl="https://upload.wikimedia.org/wikipedia/en/0/0c/The_Genie_Aladdin.png" />
+            </div>
+            <textarea className="w-full h-24 p-2 mt-4 text-lg border-4" placeholder="Ask me anything..." />
+            <button className="w-full p-2 mt-4 text-lg bg-blue-500 text-white">Ask</button>
         </ModalBody>
     </>)
 }
@@ -571,7 +575,7 @@ function GenAI() {
 function BytebeatComposer() {
     return (<>
         <TitleBar title="Bytebeats" />
-        <ModalBody><h1>Bytebeat Composer extension</h1></ModalBody>
+        <ModalBody><h1>Bytebeat Composer</h1></ModalBody>
     </>)
 }
 
@@ -593,9 +597,10 @@ export const TitleBar = ({ title }: { title: string }) => {
             <div className="ltr:pl-2 ltr:pr-4 rtl:pl-4 rtl:pr-3 font-semibold truncate">
                 <h2>{t(title).toLocaleUpperCase()}</h2>
             </div>
-            <div>
+            <div style={{ marginLeft: "18px" }}>
                 <button
                     className="flex justify-end w-7 h-4 p-0.5 rounded-full cursor-pointer bg-black dark:bg-gray-700"
+                    // TODO bring back the onClick
                     // onClick={() => dispatch(layout.setEast({ open: false }))}
                     onClick={() => {}}
                     title={t("curriculum.close")}
@@ -610,7 +615,7 @@ export const TitleBar = ({ title }: { title: string }) => {
                     <i className="icon icon-link" />
                 </button>
                 <button className="border-2 -my-1 border-black dark:border-white text-sm px-2.5 rounded-lg font-bold mx-1.5 align-text-bottom"
-                    title={t("ariaDescriptors:curriculum.switchScriptLanguage", { language: language === "python" ? "javascript" : "python" })}
+                    title="Open extension"
                     onClick={() => {
                         const newLanguage = (language === "python" ? "javascript" : "python")
                         dispatch(appState.setScriptLanguage(newLanguage))
@@ -628,3 +633,35 @@ export const TitleBar = ({ title }: { title: string }) => {
         </div>
     )
 }
+
+const FloatingImage = ({ imageUrl }: { imageUrl: string }) => {
+    const imageStyle = {
+        width: "100%",
+        height: "auto",
+        animation: "wobble 5s ease-in-out infinite",
+    }
+
+    const containerStyle = {
+        display: "inline-block",
+        overflow: "hidden",
+    }
+
+    const wobbleKeyframes = `
+    @keyframes wobble {
+      0% { transform: translate(0px, 0px) rotate(0deg); }
+      25% { transform: translate(10px, -10px) rotate(1deg); }
+      50% { transform: translate(0px, 10px) rotate(0deg); }
+      75% { transform: translate(-10px, -10px) rotate(-1deg); }
+      100% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+  `
+
+    return (
+        <div style={containerStyle}>
+            <style>{wobbleKeyframes}</style>
+            <img src={imageUrl} alt="Floating" style={imageStyle} />
+        </div>
+    )
+}
+
+export default FloatingImage
